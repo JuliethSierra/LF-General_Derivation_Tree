@@ -1,41 +1,46 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class GenerateTree {
 
-    private Node rootNode;
+    public Node rootNode;
     private int height = 0;
 
     private String axiomaticSymbol;
+    private List<String> noTerminalSymbolsList;
     private List<String> terminalSymbolsList;
-    private List<String> nonTerminalSymbolsList;
 
     public GenerateTree(String axiomaticSymbol, String[] terminalSymbolsList, String[] nonTerminalSymbolsList){
+        this.noTerminalSymbolsList = new ArrayList<>();
         this.terminalSymbolsList = new ArrayList<>();
-        this.nonTerminalSymbolsList = new ArrayList<>();
-        this.addTerminalSymbolsList(terminalSymbolsList);
-        this.addNonTerminalSymbolsList(nonTerminalSymbolsList);
+        this.addNoTerminalSymbolsList(terminalSymbolsList);
+        this.addTerminalSymbolsList(nonTerminalSymbolsList);
         this.axiomaticSymbol = axiomaticSymbol;
     }
-    //S ->a
-    //S ->Sa
-    public void addTerminalSymbolsList(String[] finalSymbol){
+
+    public GenerateTree(ArrayList<String> terminalSymbolsProductionList, ArrayList<String> nonTerminalSymbolProductionList, Node initialNode){
+        this.terminalSymbolsList = terminalSymbolsProductionList;
+        this.noTerminalSymbolsList = nonTerminalSymbolProductionList;
+        this.rootNode = initialNode;
+        this.axiomaticSymbol = rootNode.getValue();
+    }
+
+    public void addNoTerminalSymbolsList(String[] finalSymbol){
         for (int i = 0; i < finalSymbol.length; i++) {
-            terminalSymbolsList.add(finalSymbol[i]);
+            noTerminalSymbolsList.add(finalSymbol[i]);
         }
     }
-    public void addNonTerminalSymbolsList(String[] productionSymbol){
+    public void addTerminalSymbolsList(String[] productionSymbol){
         for (int i = 0; i < productionSymbol.length; i++) {
-            nonTerminalSymbolsList.add(productionSymbol[i]);
+            terminalSymbolsList.add(productionSymbol[i]);
         }
     }
-  /*  public void addNode(){
+  /**  public void addNode(){
         if(rootNode == null){
             rootNode = new Node(axiomaticSymbol);
         }else
             this.addNode(axiomaticSymbol,rootNode);
-    }*/
+    }**/
 
     public Node addNode(){
            return rootNode = new Node(axiomaticSymbol);
@@ -45,12 +50,12 @@ public class GenerateTree {
     public void addNewNode(Node node){
         String a = "a";
         while (height <= 5){
-            for (int i = 0; i < terminalSymbolsList.size(); i++){
-                if(node.getValue().equals(terminalSymbolsList.get(i))){
-                    node.setNodeList(new Node(nonTerminalSymbolsList.get(i)));
+            for (int i = 0; i < noTerminalSymbolsList.size(); i++){
+                if(node.getValue().equals(noTerminalSymbolsList.get(i))){
+                    node.setNodeList(new Node(terminalSymbolsList.get(i)));
                     //System.out.println(node.getNodeList().get(i).getValue());
-                }else if(node.getValue().contains(terminalSymbolsList.get(i))){
-                    node.setNodeList(new Node(nonTerminalSymbolsList.get(i)+ a));
+                }else if(node.getValue().contains(noTerminalSymbolsList.get(i))){
+                    node.setNodeList(new Node(terminalSymbolsList.get(i)+ a));
                     a += "a";
                     //System.out.println(node.getNodeList().get(i).getValue());
                 }
@@ -64,6 +69,28 @@ public class GenerateTree {
             }
         }
         this.showNodeList(node);
+    }
+
+    public void addNewNou(){
+        for(int i = 0; i < noTerminalSymbolsList.size(); i++){
+            if(rootNode.getValue().contains(noTerminalSymbolsList.get(i))){
+                rootNode.setNodeList(new Node(terminalSymbolsList.get(i), 1));
+                this.addNewNou(rootNode.getNodeList().get(rootNode.getNodeList().size() - 1));
+            }
+        }
+    }
+    private void addNewNou(Node rootNode){
+        if(rootNode.getHeight() >= 5){
+            return;
+        }
+        for(int i = 0; i < noTerminalSymbolsList.size(); i++){
+            if(rootNode.getValue().contains(noTerminalSymbolsList.get(i))){
+                String value = rootNode.getValue();
+                String newValue = value.replace(noTerminalSymbolsList.get(i), terminalSymbolsList.get(i));
+                rootNode.setNodeList(new Node(newValue, rootNode.getHeight() + 1));
+                this.addNewNou(rootNode.getNodeList().get(rootNode.getNodeList().size() - 1));
+            }
+        }
     }
 
     public int validateSymbolNode(Node node) {
